@@ -3,6 +3,9 @@
 [![Discord chat](https://img.shields.io/discord/764975354913619988.svg?label=discord%20chat)](https://discord.gg/fD6QCtX)
 [![MIT/Apache][s3]][l3]
 
+[s3]: https://img.shields.io/badge/license-MIT%2FApache-blue.svg
+[l3]: docs/LICENSE-MIT
+
 Demonstrates using naia with macroquad to create a 2D multiplayer web game
 
 ### Server:
