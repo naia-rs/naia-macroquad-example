@@ -25,7 +25,7 @@ pub struct App {
 
 impl App {
     pub fn new() -> Self {
-        info!("Naia Miniquad Client Example Started");
+        info!("Naia Macroquad Client Example Started");
 
         cfg_if! {
             if #[cfg(target_arch = "wasm32")] {

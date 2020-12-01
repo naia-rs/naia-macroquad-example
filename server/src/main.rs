@@ -19,7 +19,7 @@ fn main() -> io::Result<()> {
     smol::block_on(async {
         simple_logger::init_with_level(log::Level::Info).expect("A logger was already initialized");
 
-        info!("Naia Miniquad Server Example Started");
+        info!("Naia Macroquad Server Example Started");
 
         let current_ip_address = find_my_ip_address().expect("can't find ip address");
         let current_socket_address = SocketAddr::new(current_ip_address, SERVER_PORT);

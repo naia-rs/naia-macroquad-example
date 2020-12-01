@@ -4,5 +4,4 @@
 /Cargo.lock
 node_modules
 /client/target
-/client/target
 /client/dev_http_server/dist/*

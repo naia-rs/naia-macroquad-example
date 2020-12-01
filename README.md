@@ -1,9 +1,9 @@
-# naia-miniquad-example
+# naia-macroquad-example
 ![](https://tokei.rs/b1/github/naia-rs/naia-socket)
 [![Discord chat](https://img.shields.io/discord/764975354913619988.svg?label=discord%20chat)](https://discord.gg/fD6QCtX)
 [![MIT/Apache][s3]][l3]
 
-Demonstrates using naia with miniquad to create a 2D multiplayer web game
+Demonstrates using naia with macroquad to create a 2D multiplayer web game
 
 ### Server:
 
