@@ -6,7 +6,7 @@
 [s3]: https://img.shields.io/badge/license-MIT%2FApache-blue.svg
 [l3]: docs/LICENSE-MIT
 
-Demonstrates using naia with macroquad to create a 2D multiplayer web game
+Demonstrates using [naia](https://github.com/naia-rs/naia) with [macroquad](https://github.com/not-fl3/macroquad) to create a 2D multiplayer web game
 
 ### Server:
 
