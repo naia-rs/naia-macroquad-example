@@ -44,7 +44,7 @@ impl App {
 
         let auth = ExampleEvent::AuthEvent(AuthEvent::new("charlie", "12345"));
 
-        let mut client = NaiaClient::new(
+        let client = NaiaClient::new(
             server_socket_address,
             manifest_load(),
             Some(client_config),
@@ -52,13 +52,10 @@ impl App {
             Some(auth),
         );
 
-        let mut pawn_key: Option<u16> = None;
-        let mut queued_command: Option<KeyCommand> = None;
-
         App {
             client,
-            pawn_key,
-            queued_command,
+            pawn_key: None,
+            queued_command: None,
         }
     }
 
