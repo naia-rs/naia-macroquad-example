@@ -3,4 +3,5 @@ members = [
     "client",
     "server",
     "shared",
+    "client/dev_http_server",
     ]

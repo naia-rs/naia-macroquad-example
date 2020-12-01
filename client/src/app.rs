@@ -1,11 +1,11 @@
 
+use macroquad::prelude::*;
+
 use std::{net::SocketAddr, time::Duration};
 
 use naia_client::{ClientConfig, ClientEvent, NaiaClient};
 
 use naia_mq_example_shared::{get_shared_config, manifest_load, AuthEvent, ExampleActor, ExampleEvent, KeyCommand, shared_behavior, PointActorColor};
-
-use miniquad::*;
 
 const SERVER_PORT: u16 = 14191;
 
@@ -63,138 +63,112 @@ impl App {
     }
 
     pub fn update(&mut self) {
-        if let Some(result) = self.client.receive() {
-            match result {
-                Ok(event) => {
-                    match event {
-                        ClientEvent::Connection => {
-                            info!("Client connected to: {}", self.client.server_address());
-                        }
-                        ClientEvent::Disconnection => {
-                            info!("Client disconnected from: {}", self.client.server_address());
-                        }
-                        ClientEvent::Tick => {
-                            if let Some(pawn_key) = self.pawn_key {
-                                if let Some(command) = self.queued_command.take() {
-                                    self.client.send_command(pawn_key, &command);
+        // input
+        let w = is_key_down(KeyCode::W);
+        let s = is_key_down(KeyCode::S);
+        let a = is_key_down(KeyCode::A);
+        let d = is_key_down(KeyCode::D);
+
+        if let Some(command) = &mut self.queued_command {
+            if w { command.w.set(true); }
+            if s { command.s.set(true); }
+            if a { command.a.set(true); }
+            if d { command.d.set(true); }
+        } else {
+            self.queued_command = Some(KeyCommand::new(w, s, a, d));
+        }
+
+        // update
+        loop {
+            if let Some(result) = self.client.receive() {
+                match result {
+                    Ok(event) => {
+                        match event {
+                            ClientEvent::Connection => {
+                                info!("Client connected to: {}", self.client.server_address());
+                            }
+                            ClientEvent::Disconnection => {
+                                info!("Client disconnected from: {}", self.client.server_address());
+                            }
+                            ClientEvent::Tick => {
+                                if let Some(pawn_key) = self.pawn_key {
+                                    if let Some(command) = self.queued_command.take() {
+                                        self.client.send_command(pawn_key, &command);
+                                    }
                                 }
                             }
-                        }
-                        ClientEvent::AssignPawn(local_key) => {
-                            self.pawn_key = Some(local_key);
-                            info!("assign pawn");
-                        }
-                        ClientEvent::UnassignPawn(_) => {
-                            self.pawn_key = None;
-                            info!("unassign pawn");
-                        }
-                        ClientEvent::Command(pawn_key, command_type) => {
-                            match command_type {
-                                ExampleEvent::KeyCommand(key_command) => {
-                                    if let Some(typed_actor) = self.client.get_pawn_mut(&pawn_key) {
-                                        match typed_actor {
-                                            ExampleActor::PointActor(actor) => {
-                                                shared_behavior::process_command(&key_command, actor);
+                            ClientEvent::AssignPawn(local_key) => {
+                                self.pawn_key = Some(local_key);
+                                info!("assign pawn");
+                            }
+                            ClientEvent::UnassignPawn(_) => {
+                                self.pawn_key = None;
+                                info!("unassign pawn");
+                            }
+                            ClientEvent::Command(pawn_key, command_type) => {
+                                match command_type {
+                                    ExampleEvent::KeyCommand(key_command) => {
+                                        if let Some(typed_actor) = self.client.get_pawn_mut(&pawn_key) {
+                                            match typed_actor {
+                                                ExampleActor::PointActor(actor) => {
+                                                    shared_behavior::process_command(&key_command, actor);
+                                                }
                                             }
                                         }
                                     }
+                                    _ => {}
                                 }
-                                _ => {}
                             }
+                            _ => {}
                         }
-                        _ => {}
+                    }
+                    Err(err) => {
+                        info!("Client Error: {}", err);
                     }
                 }
-                Err(err) => {
-                    info!("Client Error: {}", err);
+            } else {
+                break;
+            }
+        }
+
+        // drawing
+        clear_background(BLACK);
+
+        let square_size = 32.0;
+
+        if self.client.has_connection() {
+            // draw actors
+            for actor_key in self.client.actor_keys().unwrap() {
+                if let Some(actor) = self.client.get_actor(&actor_key) {
+                    match actor {
+                        ExampleActor::PointActor(point_actor) => {
+                            let color = match point_actor.as_ref().borrow().color.get() {
+                                PointActorColor::Red => RED,
+                                PointActorColor::Blue => BLUE,
+                                PointActorColor::Yellow => YELLOW,
+                            };
+                            draw_rectangle(
+                                f32::from(*(point_actor.as_ref().borrow().x.get())),
+                                f32::from(*(point_actor.as_ref().borrow().y.get())),
+                                square_size, square_size, color);
+                        }
+                    }
+                }
+            }
+
+            // draw pawns
+            for pawn_key in self.client.pawn_keys().unwrap() {
+                if let Some(actor) = self.client.get_pawn(&pawn_key) {
+                    match actor {
+                        ExampleActor::PointActor(point_actor) => {
+                            draw_rectangle(
+                                f32::from(*(point_actor.as_ref().borrow().x.get())),
+                                f32::from(*(point_actor.as_ref().borrow().y.get())),
+                                square_size, square_size, WHITE);
+                        }
+                    }
                 }
             }
         }
     }
-
-    pub fn draw(&mut self, mut ctx: &Context) {
-        ctx.clear(Some((0., 0., 0., 0.)), None, None);
-
-//        if client.has_connection() {
-//            // draw actors
-//            for actor_key in client.actor_keys().unwrap() {
-//                if let Some(actor) = client.get_actor(&actor_key) {
-//                    match actor {
-//                        ExampleActor::PointActor(point_actor) => {
-//                            let rect = Rectangle::new(
-//                                Vector::new(
-//                                    f32::from(*(point_actor.as_ref().borrow().x.get())),
-//                                    f32::from(*(point_actor.as_ref().borrow().y.get()))),
-//                                square_size);
-//                            match point_actor.as_ref().borrow().color.get() {
-//                                PointActorColor::Red => gfx.fill_rect(&rect, Color::RED),
-//                                PointActorColor::Blue => gfx.fill_rect(&rect, Color::BLUE),
-//                                PointActorColor::Yellow => gfx.fill_rect(&rect, Color::YELLOW),
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//
-//            // draw pawns
-//            for pawn_key in client.pawn_keys().unwrap() {
-//                if let Some(actor) = client.get_pawn(&pawn_key) {
-//                    match actor {
-//                        ExampleActor::PointActor(point_actor) => {
-//                            let rect = Rectangle::new(
-//                                Vector::new(
-//                                    f32::from(*(point_actor.as_ref().borrow().x.get())),
-//                                    f32::from(*(point_actor.as_ref().borrow().y.get()))),
-//                                square_size);
-//                            gfx.fill_rect(&rect, Color::WHITE);
-//                        }
-//                    }
-//                }
-//            }
-//        }
-    }
 }
-
-//pub async fn app(window: Window, mut gfx: Graphics, mut input: Input) -> Result<()> {
-//
-//    // Quicksilver
-//
-//    let square_size = Vector::new(32.0, 32.0);
-//
-//    let mut frame_timer = Timer::time_per_second(60.0);
-//
-//    let mut pawn_key: Option<u16> = None;
-//    let mut queued_command: Option<KeyCommand> = None;
-//
-//    loop {
-//        while let Some(_) = input.next_event().await {}
-//
-//        if frame_timer.exhaust().is_some() {
-//
-//            // input
-//            let w = input.key_down(Key::W);
-//            let s = input.key_down(Key::S);
-//            let a = input.key_down(Key::A);
-//            let d = input.key_down(Key::D);
-//
-//            if let Some(command) = &mut queued_command {
-//                if w { command.w.set(true); }
-//                if s { command.s.set(true); }
-//                if a { command.a.set(true); }
-//                if d { command.d.set(true); }
-//            } else {
-//                queued_command = Some(KeyCommand::new(w, s, a, d));
-//            }
-//
-//            // update
-//            loop {
-//
-//            }
-//
-//            // drawing
-//            gfx.clear(Color::BLACK);
-//
-//
-//        }
-//    }
-//}

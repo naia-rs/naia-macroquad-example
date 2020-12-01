@@ -21,6 +21,6 @@ get_reload_actions(){
   echo $OUTPUT
 }
 
-cd demo/client/miniquad || exit
+cd client || exit
 actions="$(get_reload_actions $client $webserver_dir)"
 watchexec -r -s SIGKILL --ignore $webserver_dir/dist --ignore target --clear "$actions"

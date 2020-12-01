@@ -64,8 +64,8 @@ fn main() -> io::Result<()> {
                             if let Some(user) = server.get_user(&user_key) {
                                 info!("Naia Server connected to: {}", user.address);
 
-                                let x = Random::gen_range_u32(0, 80) * 16;
-                                let y = Random::gen_range_u32(0, 45) * 16;
+                                let x = Random::gen_range_u32(0, 50) * 16;
+                                let y = Random::gen_range_u32(0, 37) * 16;
 
                                 let actor_color = match server.get_users_count() % 3 {
                                     0 => PointActorColor::Yellow,
