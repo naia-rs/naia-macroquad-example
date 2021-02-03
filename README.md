@@ -31,9 +31,10 @@ To run a UDP client on Linux: (that will be able to communicate with a UDP serve
 
 To run a WebRTC client on Web: (that will be able to communicate with a WebRTC server)
 
-    1. Enter in your IP Address at the appropriate spot in client/src/app.rs
-    2. In a terminal, make sure your current directory is at the root naia-macroquad-example directory.
-    3. bash client/deploy.sh     // this will build and deploy a live reloading dev http server (should open your browser to localhost)
+    1. Make sure watchexec is installed by running 'cargo install watchexec' 
+    2. Enter in your IP Address at the appropriate spot in client/src/app.rs
+    3. In a terminal, make sure your current directory is at the root naia-macroquad-example directory.
+    4. bash client/deploy.sh     // this will build and deploy a live reloading dev http server (should open your browser to localhost)
 
 
 To simply build these examples instead of running them, substitute the above commands like so:
