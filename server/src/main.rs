@@ -1,19 +1,18 @@
 #[macro_use]
 extern crate log;
 
+use std::{net::{SocketAddr, IpAddr}, rc::Rc, time::Duration, collections::HashMap};
+
 use simple_logger;
 use smol::io;
 
-use naia_server::{find_my_ip_address, NaiaServer, ServerConfig, ServerEvent, UserKey, ActorKey, Random};
+use naia_server::{NaiaServer, ServerConfig, ServerEvent, UserKey, ActorKey, Random};
 
 use naia_mq_example_shared::{
     get_shared_config, manifest_load, PointActor, PointActorColor, ExampleEvent, ExampleActor, shared_behavior,
 };
 
-use std::{net::SocketAddr, rc::Rc, time::Duration, collections::HashMap};
-
 const SERVER_PORT: u16 = 14191;
-
 
 fn main() -> io::Result<()> {
     smol::block_on(async {
@@ -21,7 +20,7 @@ fn main() -> io::Result<()> {
 
         info!("Naia Macroquad Server Example Started");
 
-        let current_ip_address = find_my_ip_address().expect("can't find ip address");
+        let current_ip_address: IpAddr = "127.0.0.1".parse().expect("couldn't parse input IP address");
         let current_socket_address = SocketAddr::new(current_ip_address, SERVER_PORT);
 
         let mut server_config = ServerConfig::default();

@@ -1,21 +1,13 @@
 
 use macroquad::prelude::*;
 
-use std::{net::SocketAddr, time::Duration};
+use std::{net::{SocketAddr, IpAddr}, time::Duration};
 
 use naia_client::{ClientConfig, ClientEvent, NaiaClient};
 
 use naia_mq_example_shared::{get_shared_config, manifest_load, AuthEvent, ExampleActor, ExampleEvent, KeyCommand, shared_behavior, PointActorColor};
 
 const SERVER_PORT: u16 = 14191;
-
-cfg_if! {
-    if #[cfg(target_arch = "wasm32")] {
-        use std::net::IpAddr;
-    } else {
-        use naia_client::find_my_ip_address;
-    }
-}
 
 pub struct App {
     client: NaiaClient<ExampleEvent, ExampleActor>,
@@ -27,15 +19,8 @@ impl App {
     pub fn new() -> Self {
         info!("Naia Macroquad Client Example Started");
 
-        cfg_if! {
-            if #[cfg(target_arch = "wasm32")] {
-                // Put your Server's IP Address here!, can't easily find this automatically from the browser
-                let server_ip_address: IpAddr = "192.168.1.75".parse().expect("couldn't parse input IP address");
-            } else {
-                let server_ip_address = find_my_ip_address().expect("can't find ip address");
-            }
-        }
-
+        // Put your Server's IP Address here!, can't easily find this automatically from the browser
+        let server_ip_address: IpAddr = "127.0.0.1".parse().expect("couldn't parse input IP address");
         let server_socket_address = SocketAddr::new(server_ip_address, SERVER_PORT);
 
         let mut client_config = ClientConfig::default();
