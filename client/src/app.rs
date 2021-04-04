@@ -1,11 +1,16 @@
-
 use macroquad::prelude::*;
 
-use std::{net::{SocketAddr, IpAddr}, time::Duration};
+use std::{
+    net::{IpAddr, SocketAddr},
+    time::Duration,
+};
 
 use naia_client::{ClientConfig, ClientEvent, NaiaClient};
 
-use naia_mq_example_shared::{get_shared_config, manifest_load, AuthEvent, ExampleActor, ExampleEvent, KeyCommand, shared_behavior, PointActorColor};
+use naia_mq_example_shared::{
+    get_shared_config, manifest_load, shared_behavior, AuthEvent, ExampleActor, ExampleEvent,
+    KeyCommand, PointActorColor,
+};
 
 const SERVER_PORT: u16 = 14191;
 
@@ -20,7 +25,9 @@ impl App {
         info!("Naia Macroquad Client Example Started");
 
         // Put your Server's IP Address here!, can't easily find this automatically from the browser
-        let server_ip_address: IpAddr = "127.0.0.1".parse().expect("couldn't parse input IP address");
+        let server_ip_address: IpAddr = "127.0.0.1"
+            .parse()
+            .expect("couldn't parse input IP address");
         let server_socket_address = SocketAddr::new(server_ip_address, SERVER_PORT);
 
         let mut client_config = ClientConfig::default();
@@ -52,10 +59,18 @@ impl App {
         let d = is_key_down(KeyCode::D);
 
         if let Some(command) = &mut self.queued_command {
-            if w { command.w.set(true); }
-            if s { command.s.set(true); }
-            if a { command.a.set(true); }
-            if d { command.d.set(true); }
+            if w {
+                command.w.set(true);
+            }
+            if s {
+                command.s.set(true);
+            }
+            if a {
+                command.a.set(true);
+            }
+            if d {
+                command.d.set(true);
+            }
         } else {
             self.queued_command = Some(KeyCommand::new(w, s, a, d));
         }
@@ -64,46 +79,42 @@ impl App {
         loop {
             if let Some(result) = self.client.receive() {
                 match result {
-                    Ok(event) => {
-                        match event {
-                            ClientEvent::Connection => {
-                                info!("Client connected to: {}", self.client.server_address());
-                            }
-                            ClientEvent::Disconnection => {
-                                info!("Client disconnected from: {}", self.client.server_address());
-                            }
-                            ClientEvent::Tick => {
-                                if let Some(pawn_key) = self.pawn_key {
-                                    if let Some(command) = self.queued_command.take() {
-                                        self.client.send_command(pawn_key, &command);
-                                    }
+                    Ok(event) => match event {
+                        ClientEvent::Connection => {
+                            info!("Client connected to: {}", self.client.server_address());
+                        }
+                        ClientEvent::Disconnection => {
+                            info!("Client disconnected from: {}", self.client.server_address());
+                        }
+                        ClientEvent::Tick => {
+                            if let Some(pawn_key) = self.pawn_key {
+                                if let Some(command) = self.queued_command.take() {
+                                    self.client.send_command(pawn_key, &command);
                                 }
                             }
-                            ClientEvent::AssignPawn(local_key) => {
-                                self.pawn_key = Some(local_key);
-                                info!("assign pawn");
-                            }
-                            ClientEvent::UnassignPawn(_) => {
-                                self.pawn_key = None;
-                                info!("unassign pawn");
-                            }
-                            ClientEvent::Command(pawn_key, command_type) => {
-                                match command_type {
-                                    ExampleEvent::KeyCommand(key_command) => {
-                                        if let Some(typed_actor) = self.client.get_pawn_mut(&pawn_key) {
-                                            match typed_actor {
-                                                ExampleActor::PointActor(actor) => {
-                                                    shared_behavior::process_command(&key_command, actor);
-                                                }
-                                            }
+                        }
+                        ClientEvent::AssignPawn(local_key) => {
+                            self.pawn_key = Some(local_key);
+                            info!("assign pawn");
+                        }
+                        ClientEvent::UnassignPawn(_) => {
+                            self.pawn_key = None;
+                            info!("unassign pawn");
+                        }
+                        ClientEvent::Command(pawn_key, command_type) => match command_type {
+                            ExampleEvent::KeyCommand(key_command) => {
+                                if let Some(typed_actor) = self.client.get_pawn_mut(&pawn_key) {
+                                    match typed_actor {
+                                        ExampleActor::PointActor(actor) => {
+                                            shared_behavior::process_command(&key_command, actor);
                                         }
                                     }
-                                    _ => {}
                                 }
                             }
                             _ => {}
-                        }
-                    }
+                        },
+                        _ => {}
+                    },
                     Err(err) => {
                         info!("Client Error: {}", err);
                     }
@@ -132,7 +143,10 @@ impl App {
                             draw_rectangle(
                                 f32::from(*(point_actor.as_ref().borrow().x.get())),
                                 f32::from(*(point_actor.as_ref().borrow().y.get())),
-                                square_size, square_size, color);
+                                square_size,
+                                square_size,
+                                color,
+                            );
                         }
                     }
                 }
@@ -146,7 +160,10 @@ impl App {
                             draw_rectangle(
                                 f32::from(*(point_actor.as_ref().borrow().x.get())),
                                 f32::from(*(point_actor.as_ref().borrow().y.get())),
-                                square_size, square_size, WHITE);
+                                square_size,
+                                square_size,
+                                WHITE,
+                            );
                         }
                     }
                 }

@@ -1,4 +1,3 @@
-
 extern crate cfg_if;
 
 mod app;

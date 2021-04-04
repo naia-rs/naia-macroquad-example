@@ -1,10 +1,6 @@
+use std::{cell::RefCell, rc::Rc};
 
-use std::{
-    rc::Rc,
-    cell::RefCell,
-};
-
-use crate::{PointActor, KeyCommand};
+use crate::{KeyCommand, PointActor};
 
 const SQUARE_SPEED: u16 = 8;
 
@@ -17,15 +13,27 @@ pub fn process_command(key_command: &KeyCommand, point_actor: &Rc<RefCell<PointA
         old_y = *(actor_ref.y.get());
     }
     if *key_command.w.get() {
-        point_actor.borrow_mut().y.set(old_y.wrapping_sub(SQUARE_SPEED))
+        point_actor
+            .borrow_mut()
+            .y
+            .set(old_y.wrapping_sub(SQUARE_SPEED))
     }
     if *key_command.s.get() {
-        point_actor.borrow_mut().y.set(old_y.wrapping_add(SQUARE_SPEED))
+        point_actor
+            .borrow_mut()
+            .y
+            .set(old_y.wrapping_add(SQUARE_SPEED))
     }
     if *key_command.a.get() {
-        point_actor.borrow_mut().x.set(old_x.wrapping_sub(SQUARE_SPEED))
+        point_actor
+            .borrow_mut()
+            .x
+            .set(old_x.wrapping_sub(SQUARE_SPEED))
     }
     if *key_command.d.get() {
-        point_actor.borrow_mut().x.set(old_x.wrapping_add(SQUARE_SPEED))
+        point_actor
+            .borrow_mut()
+            .x
+            .set(old_x.wrapping_add(SQUARE_SPEED))
     }
 }

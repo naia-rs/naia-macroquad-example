@@ -13,23 +13,25 @@ pub enum PointActorColor {
 }
 
 impl Default for PointActorColor {
-    fn default() -> Self { PointActorColor::Red }
+    fn default() -> Self {
+        PointActorColor::Red
+    }
 }
 
 #[derive(Actor)]
 #[type_name = "ExampleActor"]
 pub struct PointActor {
-    #[interpolate] #[predict] pub x: Property<u16>,
-    #[interpolate] #[predict] pub y: Property<u16>,
-    pub color: Property<PointActorColor>
+    #[interpolate]
+    #[predict]
+    pub x: Property<u16>,
+    #[interpolate]
+    #[predict]
+    pub y: Property<u16>,
+    pub color: Property<PointActorColor>,
 }
 
 impl PointActor {
     pub fn new(x: u16, y: u16, color: PointActorColor) -> PointActor {
-        return PointActor::new_complete(
-            x,
-            y,
-            color,
-        );
+        return PointActor::new_complete(x, y, color);
     }
 }

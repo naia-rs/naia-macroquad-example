@@ -11,10 +11,9 @@ path = "src/main.rs"
 
 [features]
 multithread = [ "naia-client/multithread" ]
-mquad = [ "naia-client/mquad" ]
 
 [dependencies]
 cfg-if = "0.1.10"
-naia-client = { version = "0.4.2" }
+naia-client = { version = "0.4.3", features = [ "mquad" ] }
 naia-mq-example-shared = { path = "../shared" }
 macroquad = { version = "=0.3.0-alpha.12", features = [ "log-impl" ] }
