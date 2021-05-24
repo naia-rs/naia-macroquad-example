@@ -1,10 +1,10 @@
-use std::{cell::RefCell, rc::Rc};
+use naia_shared::Ref;
 
 use crate::{KeyCommand, PointActor};
 
 const SQUARE_SPEED: u16 = 8;
 
-pub fn process_command(key_command: &KeyCommand, point_actor: &Rc<RefCell<PointActor>>) {
+pub fn process_command(key_command: &KeyCommand, point_actor: &Ref<PointActor>) {
     let old_x: u16;
     let old_y: u16;
     {

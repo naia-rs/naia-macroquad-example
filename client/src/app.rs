@@ -1,9 +1,9 @@
-use macroquad::prelude::*;
-
 use std::{
     net::{IpAddr, SocketAddr},
     time::Duration,
 };
+
+use macroquad::prelude::*;
 
 use naia_client::{ClientConfig, ClientEvent, NaiaClient};
 
@@ -134,15 +134,16 @@ impl App {
             for actor_key in self.client.actor_keys().unwrap() {
                 if let Some(actor) = self.client.get_actor(&actor_key) {
                     match actor {
-                        ExampleActor::PointActor(point_actor) => {
-                            let color = match point_actor.as_ref().borrow().color.get() {
+                        ExampleActor::PointActor(actor_ref) => {
+                            let point_actor = actor_ref.borrow();
+                            let color = match point_actor.color.get() {
                                 PointActorColor::Red => RED,
                                 PointActorColor::Blue => BLUE,
                                 PointActorColor::Yellow => YELLOW,
                             };
                             draw_rectangle(
-                                f32::from(*(point_actor.as_ref().borrow().x.get())),
-                                f32::from(*(point_actor.as_ref().borrow().y.get())),
+                                f32::from(*(point_actor.x.get())),
+                                f32::from(*(point_actor.y.get())),
                                 square_size,
                                 square_size,
                                 color,
@@ -156,10 +157,11 @@ impl App {
             for pawn_key in self.client.pawn_keys().unwrap() {
                 if let Some(actor) = self.client.get_pawn(&pawn_key) {
                     match actor {
-                        ExampleActor::PointActor(point_actor) => {
+                        ExampleActor::PointActor(actor_ref) => {
+                            let point_actor = actor_ref.borrow();
                             draw_rectangle(
-                                f32::from(*(point_actor.as_ref().borrow().x.get())),
-                                f32::from(*(point_actor.as_ref().borrow().y.get())),
+                                f32::from(*(point_actor.x.get())),
+                                f32::from(*(point_actor.y.get())),
                                 square_size,
                                 square_size,
                                 WHITE,

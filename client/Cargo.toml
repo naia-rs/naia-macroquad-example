@@ -10,11 +10,11 @@ name = "naia-client-macroquad-example"
 path = "src/main.rs"
 
 [features]
-multithread = [ "naia-client/multithread" ]
+multithread = [ "naia-client/multithread", "naia-mq-example-shared/multithread" ]
 
 [dependencies]
 cfg-if = "0.1.10"
-naia-client = { version = "0.5.0", features = [ "mquad" ] }
+naia-client = { path = "../../naia/client" } #version = "0.5.0", features = [ "mquad" ] }
 naia-mq-example-shared = { path = "../shared" }
 macroquad = { version = "=0.3.0-alpha.12", features = [ "log-impl" ] }
 
