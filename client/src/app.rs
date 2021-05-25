@@ -1,23 +1,25 @@
 use std::{
     net::{IpAddr, SocketAddr},
     time::Duration,
+    collections::HashMap,
 };
 
 use macroquad::prelude::*;
 
-use naia_client::{ClientConfig, ClientEvent, NaiaClient};
+use naia_client::{ClientConfig, ClientEvent, NaiaClient, Ref};
 
 use naia_mq_example_shared::{
     get_shared_config, manifest_load, shared_behavior, AuthEvent, ExampleActor, ExampleEvent,
-    KeyCommand, PointActorColor,
+    KeyCommand, PointActorColor, PointActor
 };
 
 const SERVER_PORT: u16 = 14191;
 
 pub struct App {
     client: NaiaClient<ExampleEvent, ExampleActor>,
-    pawn_key: Option<u16>,
+    pawn: Option<(u16, Ref<PointActor>)>,
     queued_command: Option<KeyCommand>,
+    actors: HashMap<u16, Ref<PointActor>>,
 }
 
 impl App {
@@ -46,8 +48,9 @@ impl App {
 
         App {
             client,
-            pawn_key: None,
+            pawn: None,
             queued_command: None,
+            actors: HashMap::new(),
         }
     }
 
@@ -87,31 +90,45 @@ impl App {
                             info!("Client disconnected from: {}", self.client.server_address());
                         }
                         ClientEvent::Tick => {
-                            if let Some(pawn_key) = self.pawn_key {
+                            if let Some((pawn_key, _)) = self.pawn {
                                 if let Some(command) = self.queued_command.take() {
                                     self.client.send_command(pawn_key, &command);
                                 }
                             }
                         }
                         ClientEvent::AssignPawn(local_key) => {
-                            self.pawn_key = Some(local_key);
                             info!("assign pawn");
+                            if let Some(typed_actor) = self.client.get_pawn_mut(&local_key) {
+                                match typed_actor {
+                                    ExampleActor::PointActor(actor_ref) => {
+                                        self.pawn = Some((local_key, actor_ref.clone()));
+                                    }
+                                }
+                            }
                         }
                         ClientEvent::UnassignPawn(_) => {
-                            self.pawn_key = None;
+                            self.pawn = None;
                             info!("unassign pawn");
                         }
                         ClientEvent::Command(pawn_key, command_type) => match command_type {
                             ExampleEvent::KeyCommand(key_command) => {
-                                if let Some(typed_actor) = self.client.get_pawn_mut(&pawn_key) {
-                                    match typed_actor {
-                                        ExampleActor::PointActor(actor) => {
-                                            shared_behavior::process_command(&key_command, actor);
-                                        }
-                                    }
+                                if let Some((key, pawn_ref)) = &self.pawn {
+                                    shared_behavior::process_command(&key_command, &pawn_ref);
                                 }
                             }
                             _ => {}
+                        },
+                        ClientEvent::CreateActor(local_key) => {
+                            if let Some(typed_actor) = self.client.get_actor(&local_key) {
+                                match typed_actor {
+                                    ExampleActor::PointActor(actor_ref) => {
+                                        self.actors.insert(local_key, actor_ref.clone());
+                                    }
+                                }
+                            }
+                        },
+                        ClientEvent::DeleteActor(local_key) => {
+                            self.actors.remove(&local_key);
                         },
                         _ => {}
                     },
@@ -131,44 +148,32 @@ impl App {
 
         if self.client.has_connection() {
             // draw actors
-            for actor_key in self.client.actor_keys().unwrap() {
-                if let Some(actor) = self.client.get_actor(&actor_key) {
-                    match actor {
-                        ExampleActor::PointActor(actor_ref) => {
-                            let point_actor = actor_ref.borrow();
-                            let color = match point_actor.color.get() {
-                                PointActorColor::Red => RED,
-                                PointActorColor::Blue => BLUE,
-                                PointActorColor::Yellow => YELLOW,
-                            };
-                            draw_rectangle(
-                                f32::from(*(point_actor.x.get())),
-                                f32::from(*(point_actor.y.get())),
-                                square_size,
-                                square_size,
-                                color,
-                            );
-                        }
-                    }
-                }
+            for (_, actor_ref) in &self.actors {
+                let point_actor = actor_ref.borrow();
+                let color = match point_actor.color.get() {
+                    PointActorColor::Red => RED,
+                    PointActorColor::Blue => BLUE,
+                    PointActorColor::Yellow => YELLOW,
+                };
+                draw_rectangle(
+                    f32::from(*(point_actor.x.get())),
+                    f32::from(*(point_actor.y.get())),
+                    square_size,
+                    square_size,
+                    color,
+                );
             }
 
             // draw pawns
-            for pawn_key in self.client.pawn_keys().unwrap() {
-                if let Some(actor) = self.client.get_pawn(&pawn_key) {
-                    match actor {
-                        ExampleActor::PointActor(actor_ref) => {
-                            let point_actor = actor_ref.borrow();
-                            draw_rectangle(
-                                f32::from(*(point_actor.x.get())),
-                                f32::from(*(point_actor.y.get())),
-                                square_size,
-                                square_size,
-                                WHITE,
-                            );
-                        }
-                    }
-                }
+            if let Some((_, pawn_ref)) = &self.pawn {
+                let point_actor = pawn_ref.borrow();
+                draw_rectangle(
+                    f32::from(*(point_actor.x.get())),
+                    f32::from(*(point_actor.y.get())),
+                    square_size,
+                    square_size,
+                    WHITE,
+                );
             }
         }
     }

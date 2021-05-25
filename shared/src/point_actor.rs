@@ -21,10 +21,8 @@ impl Default for PointActorColor {
 #[derive(Actor)]
 #[type_name = "ExampleActor"]
 pub struct PointActor {
-    #[interpolate]
     #[predict]
     pub x: Property<u16>,
-    #[interpolate]
     #[predict]
     pub y: Property<u16>,
     pub color: Property<PointActorColor>,
