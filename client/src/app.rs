@@ -13,7 +13,7 @@ use naia_mq_example_shared::{
     KeyCommand, PointActorColor, PointActor
 };
 
-const SERVER_PORT: u16 = 14191;
+const SERVER_PORT: u16 = 14193;
 
 pub struct App {
     client: NaiaClient<ExampleEvent, ExampleActor>,
@@ -110,9 +110,17 @@ impl App {
                             self.pawn = None;
                             info!("unassign pawn");
                         }
-                        ClientEvent::Command(pawn_key, command_type) => match command_type {
+                        ClientEvent::Command(_, command_type) => match command_type {
                             ExampleEvent::KeyCommand(key_command) => {
-                                if let Some((key, pawn_ref)) = &self.pawn {
+                                if let Some((_, pawn_ref)) = &self.pawn {
+                                    shared_behavior::process_command(&key_command, &pawn_ref);
+                                }
+                            }
+                            _ => {}
+                        },
+                        ClientEvent::CommandReplay(_, command_type) => match command_type {
+                            ExampleEvent::KeyCommand(key_command) => {
+                                if let Some((_, pawn_ref)) = &self.pawn {
                                     shared_behavior::process_command(&key_command, &pawn_ref);
                                 }
                             }
