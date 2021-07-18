@@ -110,7 +110,7 @@ impl App {
                             self.pawn = None;
                             info!("unassign pawn");
                         }
-                        ClientEvent::Command(_, command_type) => match command_type {
+                        ClientEvent::NewCommand(_, command_type) => match command_type {
                             ExampleEvent::KeyCommand(key_command) => {
                                 if let Some((_, pawn_ref)) = &self.pawn {
                                     shared_behavior::process_command(&key_command, &pawn_ref);
@@ -118,7 +118,7 @@ impl App {
                             }
                             _ => {}
                         },
-                        ClientEvent::CommandReplay(_, command_type) => match command_type {
+                        ClientEvent::ReplayCommand(_, command_type) => match command_type {
                             ExampleEvent::KeyCommand(key_command) => {
                                 if let Some((_, pawn_ref)) = &self.pawn {
                                     shared_behavior::process_command(&key_command, &pawn_ref);
